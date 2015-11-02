@@ -1,0 +1,46 @@
+{
+  "categorias" : {
+    "china" : {
+      "chi_lon_qua" : true
+    },
+    "rapida" : {
+      "american_dog" : true
+    }
+  },
+  "ciudades" : {
+    "monteria" : {
+      "american_dog" : true
+    }
+  },
+  "restaurantes" : {
+    "american_dog" : {
+      "categorias" : {
+        "rapida" : true
+      },
+      "ciudad" : {
+        "monteria" : true
+      },
+      "descripcion" : "comida rapida al estilo americano",
+      "horario_de_atencion" : "4pm a 12pm",
+      "img" : "http://res.cloudinary.com/ddbjij4sx/image/upload/v1446492718/article-0-143E3516000005DC-208_306x335_stnkox.jpg",
+      "nombre" : "American Dog",
+      "platos" : {
+        "pizza_de_pollo" : {
+          "img" : "http://res.cloudinary.com/ddbjij4sx/image/upload/v1446492403/143836556328_1_ar4lnp.jpg",
+          "ingredientes" : "pollo y jamon",
+          "tamaño" : "15 cm",
+          "thumbnail" : "http://res.cloudinary.com/ddbjij4sx/image/upload/t_media_lib_thumb/v1446492403/143836556328_1_ar4lnp.jpg",
+          "valor" : 5.5
+        },
+        "pizza_sencilla" : {
+          "img" : "http://res.cloudinary.com/ddbjij4sx/image/upload/c_fit,h_522,w_532/v1446491171/jamon_queso_zmuiob.jpg",
+          "ingredientes" : "jamon y queso",
+          "tamaño" : "15 cm",
+          "thumbnail" : "http://res.cloudinary.com/ddbjij4sx/image/upload/t_media_lib_thumb/v1446491171/jamon_queso_zmuiob.png",
+          "valor" : 4.5
+        }
+      },
+      "thumbnail" : "http://res.cloudinary.com/ddbjij4sx/image/upload/t_media_lib_thumb/v1446492718/article-0-143E3516000005DC-208_306x335_stnkox.jpg"
+    }
+  }
+}

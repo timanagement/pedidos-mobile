@@ -1,11 +1,4 @@
-// Ionic Starter App
-
-// angular.module is a global place for creating, registering and retrieving Angular modules
-// 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
-// the 2nd parameter is an array of 'requires'
-// 'starter.services' is found in services.js
-// 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
+angular.module('pedidos', ['ionic', 'pedidos.controllers', 'starter.services', 'firebase'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -25,10 +18,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
 
 .config(function($stateProvider, $urlRouterProvider) {
 
-  // Ionic uses AngularUI Router which uses the concept of states
-  // Learn more here: https://github.com/angular-ui/ui-router
-  // Set up the various states which the app can be in.
-  // Each state's controller can be found in controllers.js
+
   $stateProvider
 
   // setup an abstract state for the tabs directive
@@ -40,12 +30,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
 
   // Each tab has its own nav history stack:
 
-  .state('tab.dash', {
+  .state('tab.pedidos', {
     url: '/pedidos',
     views: {
       'tab-pedidos': {
         templateUrl: 'templates/tab-pedidos.html',
-        controller: 'DashCtrl'
+        controller: 'PedidosCtrl'
       }
     }
   })
@@ -54,8 +44,8 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       url: '/chats',
       views: {
         'tab-chats': {
-          templateUrl: 'templates/tab-chats.html',
-          controller: 'ChatsCtrl'
+          templateUrl: 'templates/tab-platos.html',
+          controller: 'PlatosCtrl'
         }
       }
     })
@@ -69,17 +59,17 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       }
     })
 
-  .state('tab.account', {
+  .state('tab.cuenta', {
     url: '/cuenta',
     views: {
       'tab-cuenta': {
         templateUrl: 'templates/tab-cuenta.html',
-        controller: 'AccountCtrl'
+        controller: 'CuentaCtrl'
       }
     }
   });
 
-  // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/tab/pedidos');
+
+  $urlRouterProvider.otherwise('/tab/chats');
 
 });

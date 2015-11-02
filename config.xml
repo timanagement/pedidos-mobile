@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <widget id="com.ionicframework.pedidos598241" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>pedidos</name>
+  <name>Pedidos</name>
   <description>
-        An Ionic Framework and Cordova project.
+        Una app para pedir comida online.
     </description>
-  <author email="hi@ionicframework" href="http://ionicframework.com/">
-      Ionic Framework Team
+  <author email="yeso126@hotmail.com" href="http://ionicframework.com/">
+      Yesid Ghisays
     </author>
   <content src="index.html"/>
   <access origin="*"/>

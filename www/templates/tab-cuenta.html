@@ -1,9 +1,16 @@
 <ion-view view-title="Cuenta">
   <ion-content>
     <ion-list>
-    <ion-toggle  ng-model="settings.enableFriends">
-        Enable Friends
-    </ion-toggle>
+	    <div class="item item-divider">Facebook</div>
+	    <div class="item item-body">
+          <div>
+	        Inicia sesion en facebook para guardar tu direccion
+	      </div>
+	    </div>
     </ion-list>
+    <ion-toggle  ng-model="settings.enableFriends">
+        Guardar direccion
+    </ion-toggle>
+
   </ion-content>
 </ion-view>
