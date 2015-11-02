@@ -7,10 +7,6 @@ angular.module('pedidos.controllers', [])
 
   var restaurateRef = new Firebase('https://rapifood.firebaseio.com/');
   $scope.restaurantes =  $firebaseArray(restaurateRef.child('restaurantes'));
-  console.log($scope.restaurantes);
-
-  $scope.listaRestaurantes= $scope.restaurantes[0,1];
-  console.log($scope.listaRestaurantes);
 
 
   $scope.chats = Chats.all();
