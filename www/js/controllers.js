@@ -2,21 +2,15 @@ angular.module('pedidos.controllers', [])
 
 .controller('PedidosCtrl', function($scope) {})
 
-.controller('PlatosCtrl', function($scope, Chats, $firebaseArray ) {
+.controller('PlatosCtrl', function($scope, Restaurantes, $firebaseArray ) {
+  $scope.restaurantes =  Restaurantes.all();
 
-
-  var restaurateRef = new Firebase('https://rapifood.firebaseio.com/');
-  $scope.restaurantes =  $firebaseArray(restaurateRef.child('restaurantes'));
-
-
-  $scope.chats = Chats.all();
-  $scope.remove = function(chat) {
-    Chats.remove(chat);
-  };
 })
+.controller('ChatDetailCtrl', function($scope, $stateParams, Restaurantes) {
+  $scope.rest = Restaurantes.getOne($stateParams.restId);
+  console.log($scope.rest);
+  console.log($stateParams.restId);
 
-.controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
-  $scope.chat = Chats.get($stateParams.chatId);
 })
 
 .controller('CuentaCtrl', function() {

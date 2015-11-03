@@ -44,20 +44,22 @@ angular.module('pedidos', ['ionic', 'pedidos.controllers', 'starter.services', '
       url: '/chats',
       views: {
         'tab-chats': {
-          templateUrl: 'templates/tab-platos.html',
+          templateUrl: 'templates/tab-restaurantes.html',
           controller: 'PlatosCtrl'
         }
       }
     })
     .state('tab.chat-detail', {
-      url: '/chats/:chatId',
+      url: '/chats/:restId',
       views: {
         'tab-chats': {
-          templateUrl: 'templates/chat-detail.html',
+          templateUrl: 'templates/restaurante-detalles.html',
           controller: 'ChatDetailCtrl'
         }
       }
     })
+
+
 
   .state('tab.cuenta', {
     url: '/cuenta',
