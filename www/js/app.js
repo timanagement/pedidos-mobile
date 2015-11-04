@@ -1,5 +1,6 @@
 angular.module('pedidos', ['ionic', 'pedidos.controllers', 'starter.services', 'firebase'])
 
+
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -21,14 +22,19 @@ angular.module('pedidos', ['ionic', 'pedidos.controllers', 'starter.services', '
 
   $stateProvider
 
+  .state('login', {
+    url: '/login',
+    templateUrl: 'templates/login.html',
+    controller: 'LoginCtrl'
+  })
+
+
   // setup an abstract state for the tabs directive
     .state('tab', {
     url: '/tab',
     abstract: true,
     templateUrl: 'templates/tabs.html'
   })
-
-  // Each tab has its own nav history stack:
 
   .state('tab.pedidos', {
     url: '/pedidos',
@@ -72,6 +78,7 @@ angular.module('pedidos', ['ionic', 'pedidos.controllers', 'starter.services', '
   });
 
 
-  $urlRouterProvider.otherwise('/tab/chats');
+  $urlRouterProvider.otherwise('/login');
 
+var fb = new Firebase("https://rapifood.firebaseio.com/");
 });

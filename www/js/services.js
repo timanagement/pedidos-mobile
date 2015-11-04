@@ -22,6 +22,6 @@ angular.module('starter.services', [])
 })
 
 .factory("Auth", function($firebaseAuth) {
-  var usersRef = new Firebase("https://rapifood.firebaseio.com/");
+  var usersRef = new Firebase("https://rapifood.firebaseio.com/users");
   return $firebaseAuth(usersRef);
 });
