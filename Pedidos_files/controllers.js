@@ -26,21 +26,6 @@ angular.module('pedidos.controllers', [])
     Auth.$unauth();
   };
 
-  Auth.$onAuth(function(authData) {
-  });
-
-
-  $scope.$watch('Auth', function(authData) {
-    Auth.$onAuth(function(authData) {
-      if (authData === null) {
-        console.log("Not logged in yet");
-      } else {
-        console.log("Logged in as", authData);
-      }
-      $scope.user = authData; // This will display the user's name in our view
-    });
-});
-
 }])
 
 
@@ -62,7 +47,14 @@ angular.module('pedidos.controllers', [])
     $scope.settings = {
       enableFriends: true
     };
-
+    Auth.$onAuth(function(authData) {
+    if (authData === null) {
+      console.log("Not logged in yet");
+    } else {
+      console.log("Logged in as", authData.uid);
+    }
+    $scope.authData = authData; // This will display the user's name in our view
+  });
 });
 
 
