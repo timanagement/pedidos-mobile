@@ -11,59 +11,87 @@ angular.module('pedidos.controllers', [])
 
 })
 
-.controller('LoginCtrl',['$scope', 'Auth', '$rootScope', '$location',   function($scope, Auth, $rootScope, $location, currentAuth) {
-
-
-  $scope.login = function() {
-    Auth.$authWithOAuthRedirect("facebook");
-  };
+.controller('LoginCtrl',['$scope', '$location', 'store', 'auth', function(store, $scope, $location, auth) {
 
   $scope.redirect = function() {
-    $location.path('/bienvenido');
+    $location.path('/cuenta');
   };
 
   $scope.unAuth = function() {
     Auth.$unauth();
   };
 
-  Auth.$onAuth(function(authData) {
-  });
+  $scope.login = function() {
+    // auth.signin({
+    //   authParams: {
+    //     scope: 'openid offline_access',
+    //     device: 'Mobile device'
+    //   }
+    // }, function(profile, token, accessToken, state, refreshToken) {
+    //   // Success callback
+    //   store.set('profile', profile);
+    //   store.set('token', token);
+    //   store.set('refreshToken', refreshToken);
+    //   $location.path('/');
+    // }, function() {
+    //   // Error callback
+    // });
+
+    function doAuth() {
+   auth.signin({
+     closable: false,
+     // This asks for the refresh token
+     // So that the user never has to log in again
+     authParams: {
+       scope: 'openid offline_access'
+     }
+   }, function(profile, idToken, accessToken, state, refreshToken) {
+     store.set('profile', profile);
+     store.set('token', idToken);
+     store.set('refreshToken', refreshToken);
+     $state.go('tab.dash');
+   }, function(error) {
+     console.log("There was an error logging in", error);
+   });
+ }
+
+ $scope.$on('$ionic.reconnectScope', function() {
+   doAuth();
+ });
+
+ doAuth();
+ 
+
+  };
+
+  $scope.signin = function() {
+      auth.signin({
+        authParams: {
+          scope: 'openid name email' // Specify the scopes you want to retrieve
+        }
+      }, function(profile, idToken, accessToken, state, refreshToken) {
+        $location.path('/user-info');
+      }, function(err) {
+        console.log("Error :(", err);
+      });
+    };
 
 
-  $scope.$watch('Auth', function(authData) {
-    Auth.$onAuth(function(authData) {
-      if (authData === null) {
-        console.log("Not logged in yet");
-      } else {
-        console.log("Logged in as", authData);
-      }
-      $scope.user = authData; // This will display the user's name in our view
-    });
-});
 
 }])
 
 
 
-.controller('CuentaCtrl', function($scope, $rootScope, Auth) {
-    $scope.settings = {
-      enableFriends: true
-    };
-    Auth.$onAuth(function(authData) {
-    if (authData === null) {
-      console.log("Not logged in yet");
-    } else {
-      console.log("Logged in as", authData.uid);
-    }
-    $scope.authData = authData; // This will display the user's name in our view
-  })
+.controller('CuentaCtrl', function($scope, $rootScope) {
+  $scope.settings = {
+    enableFriends: true
+  };
 
-.controller('bienvenidoCtrl', function($scope, $rootScope, Auth, currentAuth) {
-    $scope.settings = {
-      enableFriends: true
-    };
+})
 
-});
-
+.controller('bienvenidoCtrl', function($scope, $rootScope) {
+  $scope.settings = {
+    enableFriends: true
+  };
 
 });

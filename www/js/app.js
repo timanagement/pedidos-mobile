@@ -1,7 +1,7 @@
-angular.module('pedidos', ['ionic', 'pedidos.controllers', 'starter.services', 'firebase'])
+angular.module('pedidos', ['ionic', 'pedidos.controllers', 'starter.services', 'firebase', 'auth0', 'angular-storage', 'angular-jwt'])
 
 
-.run(function($ionicPlatform, $rootScope, $state) {
+.run(function($ionicPlatform,  $state, auth) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -16,20 +16,33 @@ angular.module('pedidos', ['ionic', 'pedidos.controllers', 'starter.services', '
     }
   });
 
-
-  $rootScope.$on("$stateChangeError", function(event, toState, toParams, fromState, fromParams, error) {
-    // We can catch the error thrown when the $requireAuth promise is rejected
-    // and redirect the user back to the home page
-    if (error === "AUTH_REQUIRED") {
-      $state.go("login");
-    }
-  });
-
+   auth.hookEvents();
 
 })
 
 
-.config(function($stateProvider, $urlRouterProvider) {
+.config(function($stateProvider, $urlRouterProvider, authProvider, $httpProvider, jwtInterceptorProvider) {
+
+
+  jwtInterceptorProvider.tokenGetter = function(store, jwtHelper, auth) {
+    var idToken = store.get('token');
+    var refreshToken = store.get('refreshToken');
+    // If no token return null
+    if (!idToken || !refreshToken) {
+      return null;
+    }
+    // If token is expired, get a new one
+    if (jwtHelper.isTokenExpired(idToken)) {
+      return auth.refreshIdToken(refreshToken).then(function(idToken) {
+        store.set('token', idToken);
+        return idToken;
+      });
+    } else {
+      return idToken;
+    }
+  };
+
+  $httpProvider.interceptors.push('jwtInterceptor');
 
 
   $stateProvider
@@ -91,10 +104,16 @@ angular.module('pedidos', ['ionic', 'pedidos.controllers', 'starter.services', '
     }
   });
 
+  authProvider.init({
+    domain: 'rapifood.auth0.com',
+    clientID: 'FaL0gcs7Ndb78sTTH8J549WNOJUtFLWt',
+    callbackURL: location.href,
+    loginState: 'login' // This is the name of the state where you'll show the login, which is defined above...
+  });
+
 
 
   $urlRouterProvider.otherwise('/login');
-
 
 
 });
