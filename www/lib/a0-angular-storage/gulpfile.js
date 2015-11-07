@@ -3,7 +3,6 @@ var gulp = require('gulp'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
     rename = require('gulp-rename'),
-    jshint = require('gulp-jshint'),
     ngAnnotate = require('gulp-ng-annotate'),
     sourceFiles = [
       'src/angularStorage/angularStorage.prefix',
@@ -12,18 +11,7 @@ var gulp = require('gulp'),
       'src/angularStorage/filters/**/*.js',
       'src/angularStorage/services/**/*.js',
       'src/angularStorage/angularStorage.suffix'
-    ],
-    lintFiles = [
-      'src/angularStorage/**/*.js',
-      'test/**/*.js',
-      'gulpfile.js'
     ];
-
-gulp.task('lint', function() {
-  return gulp.src(lintFiles)
-    .pipe(jshint())
-    .pipe(jshint.reporter('jshint-stylish'));
-});
 
 gulp.task('build', function() {
   gulp.src(sourceFiles)
@@ -32,7 +20,7 @@ gulp.task('build', function() {
     .pipe(gulp.dest('./dist/'))
     .pipe(uglify())
     .pipe(rename('angular-storage.min.js'))
-    .pipe(gulp.dest('./dist'));
+    .pipe(gulp.dest('./dist'))
 });
 
 /**
@@ -41,16 +29,6 @@ gulp.task('build', function() {
 gulp.task('test', function (done) {
   karma.start({
     configFile: __dirname + '/karma-src.conf.js',
-    singleRun: true
-  }, done);
-});
-
-/**
- * Run test once in all available browsers and exit
- */
-gulp.task('test-all', function (done) {
-  karma.start({
-    configFile: __dirname + '/karma-src-all.conf.js',
     singleRun: true
   }, done);
 });
@@ -83,26 +61,5 @@ gulp.task('test-dist-minified', function (done) {
   }, done);
 });
 
-/**
- * Run code coverage tests once and exit
- */
-gulp.task('cover', function (done) {
-  karma.start({
-    configFile: __dirname + '/karma-src.conf.js',
-    singleRun: true,
-    preprocessors: {
-      'src/**/*.js': 'coverage'
-    },
-    coverageReporter: {
-      type: 'html',
-      dir: 'reports/coverage'
-    },
-    reporters: ['mocha', 'coverage']
-  }, function() {
-    console.log('Code coverage report created: %s', require('path').join(process.cwd(), 'reports', 'coverage'));
-    done();
-  });
-});
-
-gulp.task('default', ['lint', 'test', 'build']);
+gulp.task('default', ['test', 'build']);
 gulp.task('dist', ['test-dist-concatenated', 'test-dist-minified']);

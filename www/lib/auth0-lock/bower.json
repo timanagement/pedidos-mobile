@@ -1,20 +1,5 @@
 {
   "name": "auth0-lock",
-  "version": "7.10.3",
-  "main": "build/auth0-lock.js",
-  "ignore": [
-    "lib-cov",
-    "*.seed",
-    "*.log",
-    "*.csv",
-    "*.dat",
-    "*.out",
-    "*.pid",
-    "*.gz",
-    "pids",
-    "logs",
-    "results",
-    "npm-debug.log",
-    "bin"
-  ]
+  "version": "7.1.8",
+  "main": "build/auth0-lock.js"
 }

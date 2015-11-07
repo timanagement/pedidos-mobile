@@ -36,10 +36,6 @@ myApp.config(function ($routeProvider, authProvider, $httpProvider, jwtIntercept
     $location.path('/');
   });
 
-  authProvider.on('loginFailure', function() {
-    alert("Error");
-  });
-
   authProvider.on('authenticated', function($location) {
     console.log("Authenticated");
 

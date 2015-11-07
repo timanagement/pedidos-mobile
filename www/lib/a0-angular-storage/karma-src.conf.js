@@ -20,15 +20,13 @@ module.exports = function(config) {
       'karma-phantomjs-launcher',
       'karma-jquery',
       'karma-chai-jquery',
-      'karma-mocha-reporter',
-      'karma-coverage'
+      'karma-mocha-reporter'
     ],
 
     // list of files / patterns to load in the browser
     files: [
       'bower/angular/angular.js',
       'bower/angular-mocks/angular-mocks.js',
-      'bower/angular-cookies/angular-cookies.js',
       'src/**/*.js',
       'test/unit/**/*.js'
     ],

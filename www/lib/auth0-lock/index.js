@@ -9,7 +9,6 @@ require('./lib/insert-css');
  */
 
 var bonzo = require('bonzo');
-var bean = require('bean');
 var _ = require('underscore');
 var debug = require('debug')('auth0-lock');
 var Auth0 = require('auth0-js');
@@ -31,11 +30,11 @@ var OptionsManager = require('./lib/options-manager');
 
 //browser incompatibilities fixes
 var placeholderSupported = require('./lib/supports-placeholder');
+var has_animations = require('./lib/supports-animation');
 var ocreate = require('./lib/object-create');
 var stop = require('./lib/stop-event');
 var utils = require('./lib/utils');
 var bind = require('./lib/bind');
-var i18n = require('./lib/i18n');
 
 /**
  * Expose `Auth0Lock` constructor
@@ -50,6 +49,7 @@ module.exports = Auth0Lock;
  * @param {String} clientID
  * @param {String} domain
  * @param {Object} options
+ *     - cdn
  *     - assetsUrl
  * @return {Auth0Lock}
  * @constructor
@@ -61,12 +61,8 @@ function Auth0Lock (clientID, domain, options) {
   }
 
   // validate required options
-  if ('string' !== typeof clientID) {
-    throw new Error('`ClientID` required as first parameter.');
-  }
-  if ('string' !== typeof domain) {
-    throw new Error('`domain` required as second parameter.');
-  }
+  if ('string' !== typeof clientID) throw new Error('`ClientID` required as first parameter.');
+  if ('string' !== typeof domain) throw new Error('`domain` required as second parameter.');
 
   // Initiate `EventEmitter`
   EventEmitter.call(this);
@@ -90,13 +86,13 @@ function Auth0Lock (clientID, domain, options) {
 
   // use domain as assetsUrl if no assetsUrl provided
   // and domain is not *.auth0.com. Fallback to S3 url
-  this.$options.assetsUrl = this.getAssetsUrl(this.$options.assetsUrl, this.$options.domain);
+  this.$options.assetsUrl = this.$options.assetsUrl || (this.isAuth0Domain() ? 'https://cdn.auth0.com/' : 'https://' + this.$options.domain + '/');
+
+  // This cdn is only used for the "loading" image
+  this.$options.cdn = this.$options.cdn || (this.isAuth0Domain() ? 'https://d19p4zemcycm7a.cloudfront.net/w2/' : 'https://' + this.$options.domain + '/w2/');
 
   // Holds SSO Data for return user experience
   this.$ssoData = null;
-
-  // Expose `i18n.dicts` to allow custom dictionary overrides
-  this.$dicts = i18n.dicts;
 
   // Holds widget's DOM `$container` ref
   this.$container = null;
@@ -151,16 +147,12 @@ Auth0Lock.prototype.getClientConfiguration = function (done) {
 
   var clients = global.window.Auth0.clients;
   var client = clients[this.$options.clientID];
-  if (client) {
-    return this.emit('client loaded', client);
-  }
+  if (client) return this.emit('client loaded', client);
 
   // check if loading state
   // and then await for response
   // no need to monkey-patch again
-  if (this.loadState) {
-    return;
-  }
+  if (this.loadState) return;
   this.loadState = true;
 
   // Monkey patch Auth.setClient to load client
@@ -169,9 +161,7 @@ Auth0Lock.prototype.getClientConfiguration = function (done) {
     setClient.apply(window.Auth0, arguments);
 
     // If not this client, return
-    if (self.$options.clientID !== client.id) {
-      return;
-    }
+    if (self.$options.clientID !== client.id) return;
 
     // store the client
     clients[self.$options.clientID] = client;
@@ -191,7 +181,8 @@ Auth0Lock.prototype.getClientConfiguration = function (done) {
     global.window.Auth0.script_tags[this.$options.clientID] = script;
 
     // Insert script in DOM head
-    document.getElementsByTagName('head')[0].appendChild(script);
+    var firstScript = document.getElementsByTagName('script')[0];
+    firstScript.parentNode.insertBefore(script, firstScript);
   }
 
   // Handle load and error for client config
@@ -222,7 +213,7 @@ Auth0Lock.prototype.onclientloadsuccess = function() {
   // XXX: events not yet publicly supported
   this.emit('client fetch success');
   debug('Client fetch success');
-};
+}
 
 /**
  * Handle error for script load of client's configuration
@@ -233,9 +224,7 @@ Auth0Lock.prototype.onclientloadsuccess = function() {
 Auth0Lock.prototype.onclientloaderror = function(err) {
 
   // timeout has been cleared
-  if (!this.timeout) {
-    return;
-  }
+  if (!this.timeout) return;
 
   // clear error timeout
   clearTimeout(this.timeout);
@@ -244,9 +233,7 @@ Auth0Lock.prototype.onclientloaderror = function(err) {
   // If UI present, delay the show error just a little more,
   // because sometimes this loads before in the async call
   // compared to the `load` event success.
-  if (this.options) {
-    setTimeout(bind(this.showNetworkError, this), 500);
-  }
+  if (this.options) setTimeout(bind(this.showNetworkError, this), 500);
 
   // reset loadstate
   this.loadState = false;
@@ -259,13 +246,11 @@ Auth0Lock.prototype.onclientloaderror = function(err) {
   // XXX: events not yet publicly supported
   this.emit('client fetch error', error);
   debug('Error loading client: %s', error);
-};
+}
 
 Auth0Lock.prototype.showNetworkError = function() {
   // client has been loaded in some async call
-  if (global.window.Auth0.clients[this.options.$clientID]) {
-    return;
-  }
+  if (global.window.Auth0.clients[this.options.$clientID]) return;
 
   // Exhibit lock's working canvas
   this.exhibit();
@@ -279,7 +264,7 @@ Auth0Lock.prototype.showNetworkError = function() {
 
   // display error
   this._showError(this.options.i18n.t('networkError'));
-};
+}
 
 /**
  * Set's the client configuration object
@@ -344,7 +329,10 @@ Auth0Lock.prototype.insert = function() {
   var locals = {
     options:      options,
     cordova:      utils.isCordova(),
-    ios:          utils.isIOS()
+    ios:          utils.isIOS(),
+    alt_spinner:  !has_animations() ?
+      (this.$options.cdn + 'img/ajax-loader.gif') :
+      null
   };
 
   // widget container
@@ -385,21 +373,19 @@ Auth0Lock.prototype.exhibit = function() {
   this.query('div.a0-overlay').addClass('a0-active');
   this.query('.a0-panel.a0-onestep').addClass('a0-active');
 
-  this.query('.a0-overlay')
-    .toggleClass('a0-no-placeholder-support', !placeholderSupported);
+  if (!options.container) {
+    bonzo(document.body).addClass('a0-lock-open');
+  } else {
+    this.query('.a0-active').removeClass('a0-overlay');
+  }
 
   this.query('.a0-popup .a0-invalid').removeClass('a0-invalid');
 
+  this.query('.a0-overlay')
+    .toggleClass('a0-no-placeholder-support', !placeholderSupported);
+
   // buttons actions
   this.query('.a0-onestep a.a0-close').a0_on('click', bind(this.oncloseclick, this));
-
-  if (!options.container) {
-    // hides all non-lock elements when lock is open
-    bonzo(document.body).addClass('a0-lock-open');
-  } else {
-    // remove overlay when render inside a div
-    this.query('.a0-active').removeClass('a0-overlay');
-  }
 
   // close popup with ESC key
   if (options.closable) {
@@ -409,7 +395,7 @@ Auth0Lock.prototype.exhibit = function() {
   // after pre-setting classes and dom handlers
   // emit as shown
   this.emit('shown');
-};
+}
 
 /**
  * Show the widget resolving `options`
@@ -517,9 +503,7 @@ Auth0Lock.prototype.hide = function (callback) {
 
   this.$container = null;
 
-  if ('function' === typeof callback) {
-    callback();
-  }
+  if ('function' === typeof callback) callback();
   this.emit('hidden');
 
   return this;
@@ -814,61 +798,22 @@ Auth0Lock.prototype.setPanel = function(panel, name) {
   var el = 'function' === typeof panel.render ? panel.render() : panel;
   var pname = 'function' === typeof panel.render ? panel.name : (name || 'signin');
 
-  //Removes error messages on new views.
-  this._showError();
-
   this.query('.a0-mode-container').html(el);
   this.emit('%s ready'.replace('%s', pname));
-
-  // When navigating to a different panel, clear the previous panel history.
-  // The signin panel will handle this inside the panel.
-  if (pname !== 'signin') {
-    this._clearPreviousPanel();
-  }
 };
+
 
 /**
  * Resolve whether instance `$options.domain` is an
  * Auth0's domain or not
  *
- * @param {String} prefix
  * @return {Boolean}
  * @private
  */
 
-Auth0Lock.prototype.isAuth0Domain = function (prefix) {
+Auth0Lock.prototype.isAuth0Domain = function () {
   var domainUrl = utils.parseUrl('https://' + this.$options.domain);
-  if (prefix) {
-    return utils.endsWith(domainUrl.hostname, '.' + prefix + '.auth0.com') &&
-      domainUrl.hostname.match(/\./g).length === 3;
-  }
-  return utils.endsWith(domainUrl.hostname, '.auth0.com') &&
-    domainUrl.hostname.match(/\./g).length === 2;
-};
-
-/**
- * Calculate the assetsUrl.
- *
- * @param {String} assetsUrl
- * @param {String} domain
- * @return {Boolean}
- * @private
- */
-
-Auth0Lock.prototype.getAssetsUrl = function (assetsUrl, domain) {
-  if (assetsUrl) {
-    return assetsUrl;
-  }
-  if (this.isAuth0Domain('eu')) {
-    return 'https://cdn.eu.auth0.com/';
-  }
-  if (this.isAuth0Domain('au')) {
-    return 'https://cdn.au.auth0.com/';
-  }
-  if (this.isAuth0Domain()) {
-    return 'https://cdn.auth0.com/';
-  }
-  return 'https://' + this.$options.domain + '/';
+  return utils.endsWith(domainUrl.hostname, '.auth0.com');
 };
 
 /**
@@ -906,9 +851,6 @@ Auth0Lock.prototype._showError = function (message) {
 
   this.query('.a0-success').addClass('a0-hide');
   this.query('.a0-error').html(message).removeClass('a0-hide');
-  this.emit('error shown', message);
-
-  // REMOVEME: This is here for backward compatibility. Deprecated in favor of 'error shown'.
   this.emit('_error', message);
 };
 
@@ -958,23 +900,8 @@ Auth0Lock.prototype._focusError = function(input, message) {
     .addClass('a0-error-input');
 
   if (!message) return;
-  input.parent().append($.create('<span class="a0-error-message">' + message + '</span>'));
-  this.emit('error shown', message, input);
-};
-
-/**
- * Set the email address in the current panel if possible.
- *
- * @param {String} email
- * @private
- */
-
-Auth0Lock.prototype._setEmail = function(email) {
-  var email_input = this.query('input[name=email]');
-  if (email_input && email_input.length === 1) {
-    email_input.val(email);
-    bean.fire(email_input[0], 'input');
-  }
+  input.parent()
+    .append($.create('<span class="a0-error-message">' + message + '</span>'));
 };
 
 /**
@@ -1079,7 +1006,6 @@ Auth0Lock.prototype._signin = function (panel) {
     popup: this.options.popup,
     popupOptions: this.options.popupOptions,
     sso: this.options.sso,
-    login_hint: email_input.val()
   }, this.options.authParams);
 
   this.$auth0.login(loginOptions);
@@ -1107,8 +1033,7 @@ Auth0Lock.prototype._signinWithAuth0 = function (panel, connection) {
     password: password,
     popup: self.options.popup,
     popupOptions: self.options.popupOptions,
-    sso: self.options.sso,
-    login_hint: connection.domain ? username.replace('@' + connection.domain, '') : username
+    sso: self.options.sso
   };
 
   // We might be loosing some instance parameters here
@@ -1136,12 +1061,8 @@ Auth0Lock.prototype._signinWithAuth0 = function (panel, connection) {
 
   debug('sigin in with auth0');
   this.$auth0.login(loginOptions, function (err) {
-    if (!err) {
-      self.emit('signin success');
-      return;
-    }
+    if (!err) return;
 
-    self.emit('signin error', err);
     // display `panel`
     self.setPanel(panel);
 
@@ -1151,8 +1072,6 @@ Auth0Lock.prototype._signinWithAuth0 = function (panel, connection) {
 
     if (err.status !== 401) {
       self._showError(err.message || self.options.i18n.t('signin:serverErrorText'));
-    } else if ('password_change_required' === err.code) {
-      self._showError(self.options.i18n.t('signin:passwordChangeRequiredErrorText'));
     } else {
       self._showError(self.options.i18n.t('signin:wrongEmailPasswordErrorText'));
     }
@@ -1229,8 +1148,7 @@ Auth0Lock.prototype._signinPopupNoRedirect = function (connectionName, popupCall
         connection: connectionName,
         popup: self.options.popup,
         popupOptions: self.options.popupOptions,
-        sso: self.options.sso,
-        login_hint: email_input.val()
+        sso: self.options.sso
       }, options.authParams, extraParams);
 
   if ('function' !== typeof callback) {
@@ -1249,12 +1167,7 @@ Auth0Lock.prototype._signinPopupNoRedirect = function (connectionName, popupCall
   debug('sigin in with popup');
   this.$auth0.login(loginOptions, function(err, profile, id_token, access_token, state) {
     var args = Array.prototype.slice.call(arguments, 0);
-    if (!err) {
-      self.emit('signin success');
-      return callback.apply(self, args), self.hide();
-    }
-
-    self.emit('signin error', err);
+    if (!err) return callback.apply(self, args), self.hide();
 
     // display signin
     self.setPanel(panel);
@@ -1266,23 +1179,10 @@ Auth0Lock.prototype._signinPopupNoRedirect = function (connectionName, popupCall
     } else if (err.message === 'access_denied') {
       // Permissions not granted
       self._showError(self.options.i18n.t('signin:userConsentFailed'));
-    } else if (err.status === 0) {
-      self._showError(self.options.i18n.t('networkError'));
     } else if (err.status !== 401) {
       self._showError(self.options.i18n.t('signin:serverErrorText'));
-    } else if ('unauthorized' === err.code) {
-      var message = self.options.i18n.t('signin:unauthorizedErrorText');
-      self._showError((err.details && err.details.error_description) || message);
-      self._focusError(email_input);
-      self._focusError(password_input);
-    } else if ('password_change_required' === err.code) {
-      var message = self.options.i18n.t('signin:passwordChangeRequiredErrorText');
-      self._showError(message);
-      self._focusError(email_input);
-      self._focusError(password_input);
     } else {
-      var message = self.options.i18n.t('signin:wrongEmailPasswordErrorText');
-      self._showError(message);
+      self._showError(self.options.i18n.t('signin:wrongEmailPasswordErrorText'));
       self._focusError(email_input);
       self._focusError(password_input);
     }
@@ -1337,7 +1237,6 @@ Auth0Lock.prototype.getProfile = function (token, callback) {
 
 Auth0Lock.prototype.oncloseclick = function(e) {
   stop(e);
-  this.emit('close');
   this.hide();
 };
 
@@ -1370,40 +1269,6 @@ Auth0Lock.prototype.focusInput = function() {
   } catch(err) {}
 
   return this;
-};
-
-/**
- * Set the previous panel.
- * This value is used when returning back from the HRD/SSO state.
- *
- * @param {String} panelName
- * @public
- */
-
-Auth0Lock.prototype._setPreviousPanel = function (panelName) {
-  this._previousPanel = panelName;
-};
-
-/**
- * Get the previous panel.
- * This value is used when returning back from the HRD/SSO state.
- *
- * @return {String}
- * @public
- */
-
-Auth0Lock.prototype._getPreviousPanel = function () {
-  return this._previousPanel;
-};
-
-/**
- * Clear the previous panel, to prevent infinite redirects to the previous panel.
- *
- * @public
- */
-
-Auth0Lock.prototype._clearPreviousPanel = function () {
-  this._setPreviousPanel(null);
 };
 
 /**

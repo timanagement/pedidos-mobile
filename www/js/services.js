@@ -19,9 +19,4 @@ angular.module('starter.services', [])
       return null;
     }
   };
-})
-
-.factory("Auth", function($firebaseAuth) {
-  var usersRef = new Firebase("https://rapifood.firebaseio.com/users");
-  return $firebaseAuth(usersRef);
 });

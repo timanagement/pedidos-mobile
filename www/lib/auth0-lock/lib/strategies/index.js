@@ -128,11 +128,6 @@ module.exports = {
         social: true,
         imageicon: true
     },
-    'salesforce-community': {
-        css: 'salesforce',
-        title: 'Salesforce Community',
-        social: true
-    },
     'salesforce': {
         css: 'salesforce',
         title: 'Salesforce',

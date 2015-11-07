@@ -12,12 +12,6 @@ myApp.controller('RootCtrl', function (auth, $scope) {
 
 myApp.controller('LoginCtrl', function (auth, $scope) {
   $scope.auth = auth;
-
-  $scope.login = function() {
-    auth.signin({
-      responseType: 'token'
-    });
-  }
 });
 
 myApp.controller('LogoutCtrl', function (auth, $location, store) {

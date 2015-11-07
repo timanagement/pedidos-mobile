@@ -36,7 +36,6 @@
     "it": false,
     "mocha": false,
     "expect": false,
-    "Auth0": false,
-    "sinon": false
+    "Auth0": false
   }
 }

@@ -1,12 +1,4 @@
 {
-  "name": "pedidos",
-  "app_id": "",
-  "gulpStartupTasks": [
-    "sass",
-    "watch"
-  ],
-  "watchPatterns": [
-    "www/**/*",
-    "!www/lib/**/*"
-  ]
+  "name": "basic-sample",
+  "app_id": ""
 }

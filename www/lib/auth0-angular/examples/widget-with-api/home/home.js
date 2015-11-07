@@ -12,13 +12,8 @@ angular.module( 'sample.home', [
       method: 'GET'
     }).then(function() {
       alert("We got the secured data successfully");
-    }, function(response) {
-      if (response.status == 0) {
-        alert("Please download the API seed so that you can call it.");
-      }
-      else {
-        alert(response.data);
-      }
+    }, function() {
+      alert("Please download the API seed so that you can call it.");
     });
   }
 

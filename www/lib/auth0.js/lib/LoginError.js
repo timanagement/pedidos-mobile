@@ -31,12 +31,8 @@ function LoginError(status, details) {
     obj = details || { description: 'server error' };
   }
 
-  if (!obj.code) {
+  if (obj && !obj.code) {
     obj.code = obj.error;
-  }
-
-  if ('unauthorized' === obj.code) {
-    status = 401;
   }
 
   var err = Error.call(this, obj.description || obj.message || obj.error);
@@ -47,10 +43,8 @@ function LoginError(status, details) {
   err.details = obj;
 
   if (status === 0) {
-    if (!err.code || err.code !== 'offline') {
-      err.code = 'Unknown';
-      err.message = 'Unknown error.';
-    }
+    err.code = "Unknown";
+    err.message = "Unknown error.";
   }
 
   return err;

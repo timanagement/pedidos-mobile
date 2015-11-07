@@ -28,7 +28,7 @@ myApp.config(function ($routeProvider, authProvider, $httpProvider, jwtIntercept
     loginUrl: '/login'
   });
 
-  authProvider.on('loginSuccess', function($location, profilePromise, idToken, store) {
+  authProvider.on('loginSuccess', function($location, profilePromise, idToken) {
     $location.path('/');
     profilePromise.then(function(profile) {
       store.set('profile', profile);
