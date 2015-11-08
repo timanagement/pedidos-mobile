@@ -10,6 +10,7 @@ angular.module('starter.services', [])
     all: function() {
       return restaurantes;
     },
+    // Retorna un solo restaurante para que los stateparams comparen el id 
     getOne: function(restId) {
       for (var i = 0; i < restaurantes.length; i++) {
         if (restaurantes[i].$id === restId) {

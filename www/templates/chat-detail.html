@@ -7,6 +7,17 @@
 <ion-view view-title="{{rest.nombre}}">
   <ion-content class="padding">
     <img ng-src="{{rest.img}}" style="width: 128px; height: 128px">
-    <p>{{rest.descripcion}}</p>
+    <h4>{{rest.descripcion}}</h2>
+    <h5>{{rest.horario_de_atencion}}</h3>
+    <div class="list">
+      <div class="item item-avatar"
+           ng-repeat="plato in rest.platos">
+        <img ng-src="{{plato.thumbnail}}">
+        <h2>{{plato.nombre}}</h2>
+        <p>{{plato.ingredientes}}</p>
+        <p>{{plato.porcion}}</p>
+        <p>${{plato.valor}}00</p>
+      </div>
+</div>
   </ion-content>
 </ion-view>
