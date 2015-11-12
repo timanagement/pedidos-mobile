@@ -10,7 +10,7 @@ angular.module('starter.services', [])
     all: function() {
       return restaurantes;
     },
-    // Retorna un solo restaurante para que los stateparams comparen el id 
+    // Retorna un solo restaurante para que los stateparams comparen el id
     getOne: function(restId) {
       for (var i = 0; i < restaurantes.length; i++) {
         if (restaurantes[i].$id === restId) {
@@ -20,4 +20,21 @@ angular.module('starter.services', [])
       return null;
     }
   };
-});
+})
+
+.factory('$localstorage', ['$window', function($window) {
+  return {
+    set: function(key, value) {
+      $window.localStorage[key] = value;
+    },
+    get: function(key, defaultValue) {
+      return $window.localStorage[key] || defaultValue;
+    },
+    setObject: function(key, value) {
+      $window.localStorage[key] = JSON.stringify(value);
+    },
+    getObject: function(key) {
+      return JSON.parse($window.localStorage[key] || '{}');
+    }
+  };
+}]);

@@ -43,7 +43,13 @@ angular.module('starter.controllers', [])
   console.log($scope.rest);
 })
 
-.controller('AccountCtrl', function($scope, auth, store, $state) {
+.controller('AccountCtrl', function($scope, auth, store, $state, $localstorage) {
+  $scope.address= {};
+  $scope.addAddress= function (){
+      $scope.address= this.dir;
+      console.log($scope.address);
+      $localstorage.setObject('dir', this.dir);
+  };
   $scope.auth = auth;
   $scope.logout = function() {
     auth.signout();

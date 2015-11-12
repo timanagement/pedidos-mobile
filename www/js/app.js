@@ -11,7 +11,7 @@ angular.module('starter', ['ionic',
   'auth0',
   'angular-storage',
   'angular-jwt',
-  "firebase"])
+  'firebase',])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -38,7 +38,7 @@ angular.module('starter', ['ionic',
   .state('login', {
     url: "/login",
     templateUrl: "templates/login.html",
-    controller: 'LoginCtrl'
+    controllerAs: 'LoginCtrl'
   })
 
   // setup an abstract state for the tabs directive
